@@ -1,0 +1,367 @@
+DJango follows MVT rather than MVC architecture.   MVT -> Model View Template (db backend frontend),
+                                                 MVC -> Model View Controller (backend frontend db) used in php , spring
+
+starting new project (project is collection of applications)
+                            -----------------------------------------------------------------
+                            |       django-admin startproject PROJECT_NAME            |
+                            -----------------------------------------------------------------
+
+to start app APPNAME       
+                            -----------------------------------------------------------------
+                            |                   python manage.py startapp APPNAME         |
+                            -----------------------------------------------------------------
+
+
+Django File Structure
+|
+|-- PROJECT_NAME
+|   |-- __init__.py
+|   |-- asgi.py       Asynchronous Server Gateway Interface , ASGI is the spiritual successor of WSGI. It processes requests asynchronously, in the opposite way of WSGI.
+|   |-- settings.py     file and settings for project
+|   |-- urls.py
+|   |-- wsgi.py         Web Server Gateway Interface , it handles requests synchronously. When requests come in, 
+|                            they are processed sequentially or one after the other. 
+|                                They have to wait until the one before it finishes before switching to a new task. 
+|
+|-- manage.py
+|
+|-- APPNAME
+|   |-- __init__.py
+|   |-- admin.py
+|   |-- apps.py
+|   |-- models.py      # for database
+|   |-- tests.py 
+|   |-- views.py       # for backend
+|   |
+|   |-- makemigrations
+|   |           |-- __init__.py
+
+
+
+run server for project 
+                            -----------------------------------------------------------------
+                            |                      python manage.py runserver         |
+                            -----------------------------------------------------------------
+
+register app in project
+                
+                in PROJECT/setting.py   --> add path for APPNAME
+
+                        in PROJECT/setting.py 
+                             in  INSTALLED_APPS
+                                add 'formapp' , 
+
+
+create path for App in project 
+
+
+            in PROEJCT/urls.py -->  add thius in urlpatterns
+
+                            path('', include('APPNAME.urls')),   # route "/" to APP , path("req",responce) 
+
+
+create file for url routing for app
+
+            in APPNAME/ -->  create a file named 
+
+                    urls.py   i.e.   APPNAME/urls.py
+
+add path for urls in APPNAME
+
+            in APPNAME/urls.py -->  
+
+                           from django.urls import path
+                           from . import views
+
+
+                          urlpatterns = [
+                          path('', views.contact),   # first create "contact" method in views.py , route "/" to contact method
+                          ]
+
+create methods in views.py
+
+            in APPNAME/views.py -->   e.g. creating contact method 
+
+                          from django.shortcuts import render
+                          from django.http import HttpResponse
+
+                           def contact(request):
+                               return render(request, 'contact.html')
+
+                           def contacts(request):
+                               return HttpResponse('This website is working properly')
+
+create templates for app frontend
+
+            in APPNAME/templates/ -->  create a folder named 
+
+                   for  contact.html   i.e.   APPNAME/templates/contact.html
+
+
+creating forms for application (user defined methods e.g. form)
+
+    for forms we are creaing file in APPNAME/forms.py
+
+            in APPNAME/forms.py --> 
+
+                           from django import forms
+                           from .models import Contact
+
+                           class ContactForm(forms.Form):
+                               name = forms.CharField(max_length=100)
+                               email = forms.EmailField()
+                               message = forms.CharField(widget=forms.Textarea)
+                               choise  = forms.ChoiceField(choices=[('one','1'),('two','2'),('three','3')])
+
+                          # Using Model files
+
+                            class ContactForm(forms.ModelForm):   
+                                class Meta:
+                                    model = Contact  # create schema in models.py named Contact and import here
+                                    fields = ['name','email','message']
+
+accessing form data in views.py
+
+            in APPNAME/views.py --> 
+                        from .forms import ContactForm
+                        def contact(request):
+                            form = ContactForm()
+                            if request.method == 'POST':
+                                form = ContactForm(request.POST)
+                                if form.is_valid():
+                                    print('VALIDATION SUCCESS!')
+                                    print('NAME: ' + form.cleaned_data['name'])
+                                    print('EMAIL: ' + form.cleaned_data['email'])
+                                    print('MESSAGE: ' + form.cleaned_data['message'])
+                                    return HttpResponse('Success!')
+                            
+                            
+                            return render(request, 'form.html', {'form': form})  # 'API_KEY' :Value
+
+
+saving data in  database using models
+
+        in APP/models.py --> 
+
+                from django.db import models
+
+                class Contact(models.Model):
+                    name = models.CharField(max_length=100)
+                    email = models.EmailField()
+                    message = models.CharField(max_length=500)
+
+        after that makemigrations , migrate
+
+        register app in admin
+
+                APP/admin.py  -->
+
+                        from .models import Contact   # Contact is created in models.py i.e. table scheama
+                        admin.site.register(Contact)
+        also in views.py  add line --> form.save()
+
+        it will save data in database table named APPNAME_contact   -- cntact as models.py having contact
+
+
+adding crispy form 
+
+        in PROJECT/settings.py  -->
+                add in INSTALLED_APPS
+
+                        in INSTALLED_APPS
+                            add 'crispy_forms',
+
+
+
+
+configuring data base for project
+
+                            -----------------------------------------------------------------
+                            |             python manage.py makemigrations               |  runs everytime when models.py is changed
+                            -----------------------------------------------------------------
+
+                            -----------------------------------------------------------------
+                            |                       python manage.py migrate              |
+                            -----------------------------------------------------------------
+
+                            -----------------------------------------------------------------
+                            |                     python manage.py createsuperuser             |
+                            -----------------------------------------------------------------
+
+
+                      Access database CLI 
+                            -----------------------------------------------------------------
+                            |                     python manage.py dbshell              |
+                            -----------------------------------------------------------------
+
+
+
+creating static files 
+
+        create folder named static in   -->  PROJECT/static
+
+        in PROJECT/settings.py  -->  add 
+
+                        STATICFILES_DIRS = [
+   
+                   os.path.join(BASE_DIR,"static")    #static is folder name
+    
+                    ]
+
+        accessing static files as url/static/FILENAME
+  
+
+************************************************************************************************************************
+
+adding templates in project file  (e.g. html,css,javascript files)
+tip:
+there are 2 project file if projectName is "Project"  so make template folder in main project file not in Project->Project
+main Project is folder that contains manage.py
+
+steps:
+1] in Project , in settings.py there is option as TEMPLATES 
+in that 'DIRS' change blank to=:
+'DIRS': [ os.path.join(BASE_DIR,"templates")],   => templates is folder name
+
+and then in App->views.py , for index request ==>this index is fun inside views.py 
+set return as return render(responce,'index.html')==>this index.html is a file in templates folder
+e.g.=
+def index(request):
+return render(request,'index.html')
+
+
+TO send own variable value in display of code
+1] in html file in any para tag mention {{variable}}  <==variable name can be anything
+2] in views section , make like this=:
+def index(request):
+	cont={"variable":"_This is value_"}
+	return render(request,'index.html',cont)
+
+
+This will pass cont value to variable and then it again pass to html file and it will display variable
+
+
+
+Linking another page:
+make another html file in template folder e.g myself.html
+in App->urls.py==  path('myself/', views.myself,name="my"),
+in App->views.py== 
+   def myself(request):
+   	 return render(request,'myself.html')
+and in main html file give href as href="myself"
+
+
+
+templates Inheritance=:
+make base template with essential body e.g. we made base.html    all code will be inherited
+in that type 
+      {% block body %}
+      {% endblock body %}
+
+in inherited template type    {% extends 'base.html' %}  
+==> this cause use all base code as it is to inherited template  but using block body we can add own extra stuff to inherited code for body tag only also for title 
+at begining  and then type 
+  {% block body %}
+      {% endblock body %}
+
+     **dont type html code if want to insert element in body then type it in between 
+ {% block body %}      __TypeHere__                   {% endblock body %}
+
+     
+
+*************************************************************************************************************
+
+  Make attractive website using Bootstrap
+
+
+carousal =: sliding images
+
+
+**********************************************************************************************
+
+Database Releted commands=:
+python manage.py makemigrations  
+python manage.py migrate
+
+create superuser for data base==>by default dataabase used is db.sqlite3
+python manage.py createsuperuser
+
+change title og default django admin page:
+admin.site.site_header = "UMSRA Admin"
+admin.site.site_title = "UMSRA Admin Portal"
+admin.site.index_title = "Welcome to UMSRA Researcher Portal"
+
+
+
+
+
+
+Errors :
+save file everytime before executing server
+insted of import home use import .  <==dot(.)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- {% extends 'base.html' %}
+
+<style>
+
+</style>
+{% block body %}  
+
+<form  action="review" method="post">
+    {%csrf_token%}   
+<p class='conatiner mt-4' style="margin: auto auto;padding:auto;font-weight:bold;text-align:center;font-size:larger">
+
+Wite your valuable feedback :</p>
+
+
+<div class='container'>
+<div class="form-group">
+    <label for="name" class="form-label">Your Name</label>
+    <input type="text" name="name" class="form-control mb-4 " id="name" >
+  </div>
+
+
+  <div class="form-group ">
+    <label for="desc" class="form-label ">Write Your Opinon about khandoba hill range</label>
+    <textarea class="form-control mb-4" id="desc" rows="2" name="desc"></textarea>
+  </div>
+  
+<p> Rating you want to give for place(from 1 to 10)</p>
+    <div class="form-group ">
+<input type="text" name="rating" value="10"> </div>
+  
+  <input class="btn btn-primary mt-5 mr-7" type="submit" value="Submit"></div></form>
+{% endblock body %}   -->
+
+<!-- <select class="form-select mt-4" aria-label="Ratings" name="rating">
+    <option selected>3</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+  </select> -->
+
+

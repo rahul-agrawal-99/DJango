@@ -1,0 +1,78 @@
+
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Form</title>
+</head>
+<body>
+    <form method='post'>
+{% csrf_token %}
+{{ form }}
+
+<br>
+<input type='submit' value='Submit' />
+</form>
+<p id="p1"></p>
+<button onclick="myfn()" id="btn">AJAX</button>
+
+<br>
+<label for='name'>Input</label>
+<input type='text' name='' id='inp'>
+<br>
+<script>
+function myfn() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "/pro/" + "&data=" + document.getElementById('inp').value, true);
+    xhttp.onload = function() {
+        var response = this.responseText;
+        document.getElementById("p1").innerHTML = response;
+        if (response == "true") {
+            document.getElementById("btn").style.backgroundColor = "green";
+        } else {
+            document.getElementById("btn").style.backgroundColor = "red";
+        }
+    };
+    xhttp.send();
+}
+
+setInterval(clkbtn, 100);
+
+function clkbtn() {
+    document.getElementById("btn").click();
+}
+</script>
+
+
+
+</body>
+</html>
+
+<!-- <p id="p1"></p>
+<button onclick="myfn()" id="btn">AJAX</button>
+
+<script>
+function myfn() {
+    var xhttp = new XMLHttpRequest();
+
+    xhttp.open("GET", "/pro", true);
+
+    xhttp.onload = function() {
+        var response = this.responseText;
+        document.getElementById("p1").innerHTML = response;
+    };
+
+    xhttp.send();
+}
+
+// setTimeout(clkbtn, 1000);
+
+setInterval(clkbtn, 2000);
+
+function clkbtn() {
+    document.getElementById("btn").click();
+}
+</script> -->
